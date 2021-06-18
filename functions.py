@@ -140,7 +140,8 @@ def dijkstra(draw_func, grid, start, end):
 
         for neighbor in current.neighbors:
             if not neighbor.is_barrier():  # Inefficient, but for some reason updated barriers get added to neighbors
-                alt = dist[current] + 1  # Adds distance of current to the distance between neighbors
+                alt = dist[current] + current.neighbors[neighbor]
+                # Adds distance of current to the distance between neighbors
                 if alt < dist[neighbor]:
                     dist[neighbor] = alt
                     node_queue[neighbor] = alt

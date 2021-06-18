@@ -18,7 +18,8 @@ class Node:
         self.color = NODE_COLOR
         self.width = width
         self.total_rows = total_rows
-        self.neighbors = []
+        self.edge_weight = 1
+        self.neighbors = {}
 
     def get_pos(self):
         """
@@ -63,12 +64,17 @@ class Node:
         return self.color == END_COLOR
 
     def is_path(self):
+        """
+        Checks whether or not the current node instance is a path.
+        :return: A boolean representing whether or not the color has been set to the path color(turquoise).
+        """
         return self.color == PATH_COLOR
 
     def reset(self):
         """
         Sets the node's color to the original node color(white).
         """
+
         self.color = NODE_COLOR
 
     def make_start(self):
@@ -107,6 +113,14 @@ class Node:
         """
         self.color = PATH_COLOR
 
+    def make_edit(self, new_weight):
+        """
+        Makes edits to nodes weights.
+        :param new_weight: The weight of each of the edges to be set.
+        """
+        self.color = EDIT_COLOR
+        self.edge_weight = new_weight
+
     def draw(self, win):
         """
         Draws the node instance on the window.
@@ -120,14 +134,14 @@ class Node:
         :param grid: The grid/list of nodes.
         """
 
-        if self.row < self.total_rows - 1 and grid[self.row + 1][self.col].is_barrier() is False:
-            self.neighbors.append(grid[self.row + 1][self.col])
+        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():
+            self.neighbors[grid[self.row + 1][self.col]] = self.edge_weight
 
-        if self.row > 0 and grid[self.row - 1][self.col].is_barrier() is False:
-            self.neighbors.append(grid[self.row - 1][self.col])
+        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():
+            self.neighbors[grid[self.row - 1][self.col]] = self.edge_weight
 
-        if self.col < self.total_rows - 1 and grid[self.row][self.col + 1].is_barrier() is False:
-            self.neighbors.append(grid[self.row][self.col + 1])
+        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier():
+            self.neighbors[grid[self.row][self.col + 1]] = self.edge_weight
 
-        if self.col > 0 and grid[self.row][self.col - 1].is_barrier() is False:
-            self.neighbors.append(grid[self.row][self.col - 1])
+        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():
+            self.neighbors[grid[self.row][self.col - 1]] = self.edge_weight

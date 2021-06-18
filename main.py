@@ -8,7 +8,7 @@ from functions import *
 
 def main():
     """
-    :return:
+    main method - runs the window displayed.
     """
     WIN = pygame.display.set_mode((WIDTH, WIDTH), pygame.locals.DOUBLEBUF, 24)
     pygame.display.set_caption("Algorithm Comparison")
@@ -70,6 +70,13 @@ def main():
                     start = None
                     end = None
                     grid = make_grid(ROWS, WIDTH)
+
+                if event.key == pygame.K_e:
+                    pos = pygame.mouse.get_pos()
+                    row, col = get_clicked_pos(pos, ROWS, WIDTH)
+                    node = grid[row][col]
+                    edge_weight = int(input("What is the weight of all direction edges for this node?"))
+                    node.make_edit(edge_weight)
 
                 if event.key == pygame.K_b:
                     grid = make_grid_keep_barriers(ROWS, grid)
