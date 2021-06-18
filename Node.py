@@ -9,6 +9,7 @@ class Node:
     """
     Class Node that holds attributes and methods regarding nodes.
     """
+
     def __init__(self, row, col, width, total_rows):
         self.row = row
         self.col = col
@@ -118,14 +119,15 @@ class Node:
         Updates the neighbor list attribute.
         :param grid: The grid/list of nodes.
         """
-        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():
+
+        if self.row < self.total_rows - 1 and grid[self.row + 1][self.col].is_barrier() is False:
             self.neighbors.append(grid[self.row + 1][self.col])
 
-        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():
+        if self.row > 0 and grid[self.row - 1][self.col].is_barrier() is False:
             self.neighbors.append(grid[self.row - 1][self.col])
 
-        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier():
+        if self.col < self.total_rows - 1 and grid[self.row][self.col + 1].is_barrier() is False:
             self.neighbors.append(grid[self.row][self.col + 1])
 
-        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():
+        if self.col > 0 and grid[self.row][self.col - 1].is_barrier() is False:
             self.neighbors.append(grid[self.row][self.col - 1])

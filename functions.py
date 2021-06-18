@@ -4,19 +4,6 @@ External functions used to make, draw, and find positions on grid.
 from Node import Node
 from constants import *
 import pygame
-from queue import PriorityQueue
-
-
-def find_dist(p1, p2):
-    """
-    Finds the distance given two positions/points.
-    :param p1: The starting point.
-    :param p2: The destination point
-    :return: The distance of nodes between the two points
-    """
-    x1, y1 = p1
-    x2, y2 = p2
-    return abs(x1 - x2) + abs(y1 - y2)
 
 
 def make_grid(rows, width):
@@ -35,16 +22,24 @@ def make_grid(rows, width):
             grid[i].append(node)
     return grid
 
-def make_grid_leave_barrier(rows, width, oldgrid):
+
+def make_grid_keep_barriers(rows, oldgrid):
+    """
+    Makes new grid keeping barriers and start and end.
+    :param rows: The amount of rows.
+    :param oldgrid: The previous grid.
+    :return: The new grid with only barriers, start, and end.
+    """
     grid = []
     for i in range(rows):
         grid.append([])
         for j in range(rows):
             node = oldgrid[i][j]
-            if not oldgrid[i][j].is_barrier() and not oldgrid[i][j].is_start() and not oldgrid[i][j].is_end():
+            if not (node.is_barrier() or node.is_end() or node.is_start()):
                 node.reset()
             grid[i].append(node)
     return grid
+
 
 def draw_grid(win, rows, width):
     """
@@ -58,7 +53,6 @@ def draw_grid(win, rows, width):
         pygame.draw.line(win, OPEN_COLOR, (0, i * gap), (width, i * gap))
         for j in range(rows):
             pygame.draw.line(win, OPEN_COLOR, (j * gap, 0), (j * gap, width))
-
 
 
 def draw(win, grid, rows, width):
@@ -108,6 +102,7 @@ def reconstruct_path(came_from, current, draw_func):
             current.make_path()
         draw_func()
 
+
 def dijkstra(draw_func, grid, start, end):
     """
     Dijkstra's algorithm implemented with pygame
@@ -131,7 +126,6 @@ def dijkstra(draw_func, grid, start, end):
                 pygame.quit()
 
         current = min(node_queue, key=node_queue.get)
-
         if dist[current] == float('inf'):  # If the minimum distance is infinity
             break
 
@@ -145,17 +139,17 @@ def dijkstra(draw_func, grid, start, end):
             return True
 
         for neighbor in current.neighbors:
-            alt = dist[current] + 1  # Adds distance of current to the distance between neighbors
-            # Change in the future to find dist between current and neighbor when adding edge weights
-            if alt < dist[neighbor]:
-                dist[neighbor] = alt
-                node_queue[neighbor] = alt
-                previous[neighbor] = current
-                if not (neighbor.is_start() or neighbor.is_end()):
-                    neighbor.make_open()
+            if not neighbor.is_barrier():  # Inefficient, but for some reason updated barriers get added to neighbors
+                alt = dist[current] + 1  # Adds distance of current to the distance between neighbors
+                if alt < dist[neighbor]:
+                    dist[neighbor] = alt
+                    node_queue[neighbor] = alt
+                    previous[neighbor] = current
+                    if not (neighbor.is_start() or neighbor.is_end() or neighbor.is_barrier()):
+                        neighbor.make_open()
 
-            elif current != start and current != end:  # Closes unneeded nodes
-                current.make_closed()
+                elif current != start and current != end and current.is_open():  # Closes unneeded nodes
+                    current.make_closed()
 
         draw_func()
 

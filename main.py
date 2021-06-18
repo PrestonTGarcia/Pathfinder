@@ -16,7 +16,6 @@ def main():
 
     start = None
     end = None
-    need_reset = False
     run = True
 
     while run:
@@ -59,19 +58,21 @@ def main():
 
             if event.type == pygame.KEYDOWN:
 
-                if event.key == pygame.K_SPACE and start and end and not need_reset:
+                if event.key == pygame.K_SPACE and start and end:
+                    make_grid_keep_barriers(ROWS, grid)
                     for row in grid:
                         for node in row:
                             node.update_neighbors(grid)
 
                     dijkstra(lambda: draw(WIN, grid, ROWS, WIDTH), grid, start, end)
-                    need_reset = True
 
                 if event.key == pygame.K_r:
                     start = None
                     end = None
                     grid = make_grid(ROWS, WIDTH)
-                    need_reset = False
+
+                if event.key == pygame.K_b:
+                    grid = make_grid_keep_barriers(ROWS, grid)
 
     pygame.quit()
 
