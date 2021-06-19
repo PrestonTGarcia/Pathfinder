@@ -76,8 +76,8 @@ def main():
                     pos = pygame.mouse.get_pos()
                     row, col = get_clicked_pos(pos, ROWS, WIDTH)
                     node = grid[row][col]
-                    edge_weight = EditWindow.main()
-                    node.make_edit(edge_weight)
+                    weight_list = EditWindow.main()
+                    node.make_edit(weight_list)
 
                 if event.key == pygame.K_b:
                     grid = make_grid_keep_barriers(ROWS, grid)

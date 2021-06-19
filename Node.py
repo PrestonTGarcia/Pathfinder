@@ -18,7 +18,7 @@ class Node:
         self.color = NODE_COLOR
         self.width = width
         self.total_rows = total_rows
-        self.edge_weight = 1
+        self.left_weight, self.right_weight, self.down_weight, self.up_weight = 1, 1, 1, 1
         self.neighbors = {}
 
     def get_pos(self):
@@ -113,13 +113,16 @@ class Node:
         """
         self.color = PATH_COLOR
 
-    def make_edit(self, new_weight):
+    def make_edit(self, weight_list):
         """
         Makes edits to nodes weights.
-        :param new_weight: The weight of each of the edges to be set.
+        :param weight_list:
         """
         self.color = EDIT_COLOR
-        self.edge_weight = new_weight
+        self.down_weight = weight_list[0]
+        self.up_weight = weight_list[1]
+        self.right_weight = weight_list[2]
+        self.left_weight = weight_list[3]
 
     def draw(self, win):
         """
@@ -134,14 +137,14 @@ class Node:
         :param grid: The grid/list of nodes.
         """
 
-        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():
-            self.neighbors[grid[self.row + 1][self.col]] = self.edge_weight
+        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():  # Down
+            self.neighbors[grid[self.row + 1][self.col]] = self.down_weight
 
-        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():
-            self.neighbors[grid[self.row - 1][self.col]] = self.edge_weight
+        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():  # Up
+            self.neighbors[grid[self.row - 1][self.col]] = self.up_weight
 
-        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier():
-            self.neighbors[grid[self.row][self.col + 1]] = self.edge_weight
+        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier():  # Right
+            self.neighbors[grid[self.row][self.col + 1]] = self.right_weight
 
-        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():
-            self.neighbors[grid[self.row][self.col - 1]] = self.edge_weight
+        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():  # Left
+            self.neighbors[grid[self.row][self.col - 1]] = self.left_weight

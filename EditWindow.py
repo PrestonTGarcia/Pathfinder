@@ -1,40 +1,57 @@
 """
-
+Window used for editing the edges.
 """
 import tkinter as tk
 
 
 def main():
     """
-    Opens the edit window and
+    Opens the edit window and returns edits needed.
     """
     root = tk.Tk()
     root.configure(width=500, height=150, bg="white")
     weight = []
-    questionLabel = tk.Label(root, text="What is the new weight of each of the edges for this node?", bg='white')
-    weightEntry = tk.Entry(root, width=3, bd=3)
+    question_label = tk.Label(root, text="What is the new weight of each of the edges for this node?", bg='white')
+    down_entry = tk.Entry(root, width=3, bd=3)
+    up_entry = tk.Entry(root, width=3, bd=3)
+    right_entry = tk.Entry(root, width=3, bd=3)
+    left_entry = tk.Entry(root, width=3, bd=3)
 
-    def submit(weightList):
+    def submit(weight_list):
         """
         Appends the weight entry values to the list and closes the window
-        :param weightList: The list of weights(currently only one weight)
+        :param weight_list: The list of weights(currently only one weight)
         """
-        weightList.append(int(weightEntry.get()))
+        weight_list.append(int(down_entry.get()))
+        weight_list.append(int(up_entry.get()))
+        weight_list.append(int(right_entry.get()))
+        weight_list.append(int(left_entry.get()))
         root.destroy()
 
     submitButton = tk.Button(root, text='Submit', bg='lime', command=lambda: submit(weight))
-    questionLabel.pack()
-    weightEntry.pack()
+    question_label.pack()
+    down_entry.pack()
+    up_entry.pack()
+    right_entry.pack()
+    left_entry.pack()
     submitButton.pack()
-    questionLabel.place(x=90, y=20)
-    weightEntry.place(x=240, y=70)
+    question_label.place(x=90, y=20)
+    down_entry.place(x=150, y=70)
+    up_entry.place(x=210, y=70)
+    right_entry.place(x=270, y=70)
+    left_entry.place(x=330, y=70)
     submitButton.place(x=227, y=120)
     root.mainloop()
 
     try:
-        return weight[0]  # Only returns the the 0th index for now because all edges have the same weight.
+        if len(weight) != 4:
+            raise IndexError
+
+        return weight
+
     except IndexError:
         pass
+
 
 if __name__ == '__main__':
     main()
