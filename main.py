@@ -3,6 +3,7 @@ The main method of the program: opens pygame window and has main loop.
 """
 import pygame.locals
 
+import EditWindow
 from functions import *
 
 
@@ -75,7 +76,7 @@ def main():
                     pos = pygame.mouse.get_pos()
                     row, col = get_clicked_pos(pos, ROWS, WIDTH)
                     node = grid[row][col]
-                    edge_weight = int(input("What is the weight of all direction edges for this node?"))
+                    edge_weight = EditWindow.main()
                     node.make_edit(edge_weight)
 
                 if event.key == pygame.K_b:
