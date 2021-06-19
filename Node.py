@@ -63,12 +63,12 @@ class Node:
         """
         return self.color == END_COLOR
 
-    def is_path(self):
+    def is_edited(self):
         """
-        Checks whether or not the current node instance is a path.
-        :return: A boolean representing whether or not the color has been set to the path color(turquoise).
+        Checks whether or not the node instance is an edited node.
+        :return: A boolean representing whether or not the color has been set to the edit color(blue).
         """
-        return self.color == PATH_COLOR
+        return self.color == EDIT_COLOR
 
     def reset(self):
         """

@@ -60,7 +60,7 @@ def main():
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_SPACE and start and end:
-                    make_grid_keep_barriers(ROWS, grid)
+                    make_grid_keep_edits(ROWS, grid)
                     for row in grid:
                         for node in row:
                             node.update_neighbors(grid)
@@ -80,7 +80,7 @@ def main():
                     node.make_edit(weight_list)
 
                 if event.key == pygame.K_b:
-                    grid = make_grid_keep_barriers(ROWS, grid)
+                    grid = make_grid_keep_edits(ROWS, grid)
 
     pygame.quit()
 

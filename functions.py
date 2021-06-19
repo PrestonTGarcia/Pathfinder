@@ -23,7 +23,7 @@ def make_grid(rows, width):
     return grid
 
 
-def make_grid_keep_barriers(rows, oldgrid):
+def make_grid_keep_edits(rows, oldgrid):
     """
     Makes new grid keeping barriers and start and end.
     :param rows: The amount of rows.
@@ -35,7 +35,7 @@ def make_grid_keep_barriers(rows, oldgrid):
         grid.append([])
         for j in range(rows):
             node = oldgrid[i][j]
-            if not (node.is_barrier() or node.is_end() or node.is_start()):
+            if not (node.is_barrier() or node.is_end() or node.is_start() or node.is_edited()):
                 node.reset()
             grid[i].append(node)
     return grid
