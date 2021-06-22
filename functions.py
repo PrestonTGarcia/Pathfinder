@@ -1,9 +1,9 @@
 """
 External functions used to make, draw, and find positions on grid.
 """
-from NegativeCycleError import NegativeCycleError
+from NegativeCycleException import NegativeCycleException
 from Node import Node
-from constants import *
+from constants import COLORS
 import pygame
 from Edge import Edge
 
@@ -37,7 +37,7 @@ def make_grid_keep_edits(rows, oldgrid):
         grid.append([])
         for j in range(rows):
             node = oldgrid[i][j]
-            if not (node.is_barrier() or node.is_end() or node.is_start() or node.is_edited()):
+            if not node.is_state('BARRIER', 'END', 'START', 'EDIT'):
                 node.reset()
             grid[i].append(node)
     return grid
@@ -52,9 +52,10 @@ def draw_grid(win, rows, width):
     """
     gap = width // rows
     for i in range(rows):
-        pygame.draw.line(win, LINE_COLOR, (0, i * gap), (width, i * gap))
+        pygame.draw.line(win, COLORS['LINE'], (0, i * gap), (width, i * gap))
         for j in range(rows):
-            pygame.draw.line(win, LINE_COLOR, (j * gap, 0), (j * gap, width))
+            pygame.draw.line(
+                win, COLORS['LINE'], (j * gap, 0), (j * gap, width))
 
 
 def draw(win, grid, rows, width):
@@ -65,7 +66,7 @@ def draw(win, grid, rows, width):
     :param rows: The amount of rows in the grid.
     :param width: The width of the window.
     """
-    win.fill(NODE_COLOR)
+    win.fill(COLORS['NODE'])
 
     for row in grid:
         for node in row:
@@ -85,9 +86,9 @@ def get_clicked_pos(pos, rows, width):
     :return: The row and column clicked on.
     """
     gap = width // rows
-    y, x = pos
-    row = y // gap
-    col = x // gap
+    y_pos, x_pos = pos
+    row = y_pos // gap
+    col = x_pos // gap
     return row, col
 
 
@@ -95,14 +96,15 @@ def reconstruct_path(came_from, current, draw_func):
     """
     Draws the path found from the algorithm.
     :param came_from: The list of nodes in the path.
-    :param current: The current node being analyzed; the end node since this is only called when end is found.
+    :param current: The current node being analyzed;
+    the end node since this is only called when end is found.
     :param draw_func: The function used to draw.
     """
     while current in came_from:
         current = came_from[current]
         if current is not None:
-            if not current.is_start():
-                current.make_path()
+            if not current.is_state('START'):
+                current.set_state('PATH')
         draw_func()
 
 
@@ -116,9 +118,11 @@ def dijkstra(draw_func, grid, start, end):
     :return: A boolean representing whether or not a path is possible between the two nodes.
     """
     commands = 0
-    dist = {node: float('inf') for row in grid for node in row}  # Sets dist of each node to infinity
+    dist = {node: float('inf') for row in grid for node in row}
+    # Sets dist of each node to infinity
     commands += len(dist)
-    previous = {node: None for row in grid for node in row}  # Sets previous of each node to None
+    # Sets previous of each node to None
+    previous = {node: None for row in grid for node in row}
     commands += len(previous)
     dist[start] = 0
     node_queue = dist.copy()
@@ -126,18 +130,22 @@ def dijkstra(draw_func, grid, start, end):
     if draw_func:
         pygame.display.set_caption('Checking nearby nodes...')
     else:
-        pygame.display.set_caption('Calculating Dijkstra\'s in headless mode...')
+        pygame.display.set_caption(
+            'Calculating Dijkstra\'s in headless mode...')
 
     while node_queue:  # Checks if the queue is empty
 
         for event in pygame.event.get():
 
-            if event.type == pygame.QUIT or pygame.key.get_pressed()[pygame.K_ESCAPE]:
-                # If user wants to quit the algorithm midway through the visualization
+            if event.type == pygame.QUIT or pygame.key.get_pressed()[
+                    pygame.K_ESCAPE]:
+                # If user wants to quit the algorithm midway through the
+                # visualization
                 pygame.quit()
 
         current = min(node_queue, key=node_queue.get)
-        if dist[current] == float('inf'):  # If the minimum distance is infinity
+        if dist[current] == float(
+                'inf'):  # If the minimum distance is infinity
             break
 
         del node_queue[current]  # Removes the minimum current from the set
@@ -145,27 +153,33 @@ def dijkstra(draw_func, grid, start, end):
         if current == end:  # If we reached the end
             if draw_func:
                 reconstruct_path(previous, current, draw_func)
-                # Recolors start and end to avoid loss of start and end positions
-                start.make_start()
-                end.make_end()
+                # Recolors start and end to avoid loss of start and end
+                # positions
+                start.set_state('START')
+                end.set_state('END')
             return commands, True
 
         for neighbor in current.neighbors:
             commands += 1
-            if not neighbor.is_barrier():  # Inefficient, but for some reason updated barriers get added to neighbors
+            if not neighbor.is_state('BARRIER'):
+                # Inefficient, but for some reason updated barriers get added
+                # to neighbors
                 alt = dist[current] + current.neighbors[neighbor]
                 # Adds distance of current to the distance between neighbors
                 if alt < dist[neighbor]:
                     dist[neighbor] = alt
                     node_queue[neighbor] = alt
                     previous[neighbor] = current
-                    if not (neighbor.is_start() or neighbor.is_end() or neighbor.is_barrier())\
-                            and draw_func:
-                        neighbor.make_open()
+                    if not (
+                        neighbor.is_state(
+                            'START',
+                            'END',
+                            'BARRIER')) and draw_func:
+                        neighbor.set_state('OPEN')
 
-                elif current != start and current != end and current.is_open()\
+                elif current != start and current != end and current.is_state('OPEN')\
                         and draw_func:  # Closes unneeded nodes
-                    current.make_closed()
+                    current.set_state('CLOSED')
 
         if draw_func:
             draw_func()
@@ -190,13 +204,14 @@ def bellmanford(draw_func, grid, start, end):
     commands += len(previous)
     dist[start] = 0
     edges = tuple(Edge(node, neighbor, node.neighbors[neighbor]) for row in grid
-                  for node in row for neighbor in node.neighbors if not node.is_barrier())
+                  for node in row for neighbor in node.neighbors if not node.is_state('BARRIER'))
 
     if draw_func:
         pygame.display.set_caption('Mapping each node...')
 
     else:
-        pygame.display.set_caption('Calculating Bellman Ford in Headless Mode...')
+        pygame.display.set_caption(
+            'Calculating Bellman Ford in Headless Mode...')
 
     for row in grid:
 
@@ -204,27 +219,33 @@ def bellmanford(draw_func, grid, start, end):
 
             for event in pygame.event.get():
 
-                if event.type == pygame.QUIT or pygame.key.get_pressed()[pygame.K_ESCAPE]:
-                    # If user wants to quit the algorithm midway through the visualization
+                if event.type == pygame.QUIT or pygame.key.get_pressed()[
+                        pygame.K_ESCAPE]:
+                    # If user wants to quit the algorithm midway through the
+                    # visualization
                     pygame.quit()
 
             for edge in edges:
 
                 current = edge.get_source()
                 neighbor = edge.get_destination()
-                if not current.is_barrier():
+                if not current.is_state('BARRIER'):
                     temp_dist = dist[current] + edge.get_weight()
                     if temp_dist < dist[neighbor]:
                         dist[neighbor] = temp_dist
                         previous[neighbor] = current
-                        if not (neighbor.is_start() or neighbor.is_end() or neighbor.is_barrier())\
-                                and draw_func:
-                            neighbor.make_open()
+                        if not (
+                            neighbor.is_state(
+                                'START',
+                                'END',
+                                'BARRIER')) and draw_func:
+                            neighbor.set_state('OPEN')
                             changes_made = True
 
-                if current != start and current != end and current.is_open()\
-                        and draw_func:  # Closes unneeded nodes
-                    current.make_closed()
+                if current != start and current != end and current.is_state(
+                        'OPEN') and draw_func:
+                    # Closes unneeded nodes
+                    current.set_state('CLOSED')
                     changes_made = True
 
             if changes_made and draw_func:
@@ -243,20 +264,22 @@ def bellmanford(draw_func, grid, start, end):
 
             for event in pygame.event.get():
 
-                if event.type == pygame.QUIT or pygame.key.get_pressed()[pygame.K_ESCAPE]:
-                    # If user wants to quit the algorithm midway through the visualization
+                if event.type == pygame.QUIT or pygame.key.get_pressed()[
+                        pygame.K_ESCAPE]:
+                    # If user wants to quit the algorithm midway through the
+                    # visualization
                     pygame.quit()
 
             current = edge.get_source()
             neighbor = edge.get_destination()
             if dist[current] + edge.weight < dist[neighbor]:
-                raise NegativeCycleError
+                raise NegativeCycleException
 
         if draw_func:
             reconstruct_path(previous, end, draw_func)
 
         return commands, True
 
-    except NegativeCycleError:
+    except NegativeCycleException:
 
         return commands, False

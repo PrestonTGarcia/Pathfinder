@@ -15,7 +15,7 @@ class Node:
         self.col = col
         self.x = row * width
         self.y = col * width
-        self.color = NODE_COLOR
+        self.color = COLORS['NODE']
         self.width = width
         self.total_rows = total_rows
         self.left_weight, self.right_weight, self.down_weight, self.up_weight = 1, 1, 1, 1
@@ -28,101 +28,47 @@ class Node:
         """
         return self.row, self.col
 
-    def is_closed(self):
+    def is_state(self, *states):
         """
-        Checks whether or not the node instance is closed.
-        :return: A boolean representing whether or not the color has been set to the closed color(black).
+        Checks to see if the current node instance is a certain state.
+        BARRIER, START, NODE, CLOSED, END, OPEN, PATH, EDIT, LINE
+        :return: A boolean representing whether or not the node instance has the given state.
         """
-        return self.color == CLOSED_COLOR
 
-    def is_open(self):
-        """
-        Checks whether or not the node instance is open.
-        :return: A boolean representing whether or not the color has been set to the open color(grey).
-        """
-        return self.color == OPEN_COLOR
+        for state in states:
 
-    def is_barrier(self):
-        """
-        Checks whether or not the node instance is a barrier.
-        :return: A boolean representing whether or not the color has been set to the barrier color(red).
-        """
-        return self.color == BARRIER_COLOR
+            if self.color == COLORS[state]:
 
-    def is_start(self):
-        """
-        Checks whether or not the node instance is the start node.
-        :return: A boolean representing whether or not the color has been set to the start color(green).
-        """
-        return self.color == START_COLOR
+                return True
 
-    def is_end(self):
-        """
-        Checks whether or not the node instance is the end node.
-        :return: A boolean representing whether or not the color has been set to the end color(orange).
-        """
-        return self.color == END_COLOR
-
-    def is_edited(self):
-        """
-        Checks whether or not the node instance is an edited node.
-        :return: A boolean representing whether or not the color has been set to the edit color(blue).
-        """
-        return self.color == EDIT_COLOR
+        return False
 
     def reset(self):
         """
         Sets the node's color to the original node color(white).
         """
 
-        self.color = NODE_COLOR
+        self.color = COLORS['NODE']
         self.down_weight = 1
         self.up_weight = 1
         self.right_weight = 1
         self.left_weight = 1
 
-    def make_start(self):
+    def set_state(self, state):
         """
-        Sets the node's color to the start node color(green).
+        Sets the current node instance to a certain state/color.
+        :param state: The state that is to be set to. This state could be any of the below states.
+        BARRIER, START, NODE, CLOSED, END, OPEN, PATH, EDIT, LINE
         """
-        self.color = START_COLOR
 
-    def make_closed(self):
-        """
-        Sets the node's color to the closed color(black).
-        """
-        self.color = CLOSED_COLOR
-
-    def make_open(self):
-        """
-        Sets the node's color to the open color(grey).
-        """
-        self.color = OPEN_COLOR
-
-    def make_barrier(self):
-        """
-        Sets the node's color to the barrier color(red).
-        """
-        self.color = BARRIER_COLOR
-
-    def make_end(self):
-        """
-        Sets the node's color to the end color(orange).
-        """
-        self.color = END_COLOR
-
-    def make_path(self):
-        """
-        Sets the node's color to the path color(turquoise).
-        """
-        self.color = PATH_COLOR
+        self.color = COLORS[state]
 
     def make_edit(self, weight_list):
         """
         Makes edits to nodes weights.
         :param weight_list:
         """
-        self.color = EDIT_COLOR
+        self.color = COLORS['EDIT']
         self.down_weight = weight_list[0]
         self.up_weight = weight_list[1]
         self.right_weight = weight_list[2]
@@ -133,7 +79,13 @@ class Node:
         Draws the node instance on the window.
         :param win: The window being drawn on.
         """
-        pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
+        pygame.draw.rect(
+            win,
+            self.color,
+            (self.x,
+             self.y,
+             self.width,
+             self.width))
 
     def update_neighbors(self, grid):
         """
@@ -141,14 +93,18 @@ class Node:
         :param grid: The grid/list of nodes.
         """
 
-        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():  # Down
+        if self.row < self.total_rows - \
+                1 and not grid[self.row + 1][self.col].is_state('BARRIER'):  # Down
             self.neighbors[grid[self.row + 1][self.col]] = self.down_weight
 
-        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():  # Up
+        if self.row > 0 and not grid[self.row -
+                                     1][self.col].is_state('BARRIER'):  # Up
             self.neighbors[grid[self.row - 1][self.col]] = self.up_weight
 
-        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier():  # Right
+        if self.col < self.total_rows - \
+                1 and not grid[self.row][self.col + 1].is_state('BARRIER'):  # Right
             self.neighbors[grid[self.row][self.col + 1]] = self.right_weight
 
-        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():  # Left
+        if self.col > 0 and not grid[self.row][self.col -
+                                               1].is_state('BARRIER'):  # Left
             self.neighbors[grid[self.row][self.col - 1]] = self.left_weight
