@@ -76,6 +76,10 @@ class Node:
         """
 
         self.color = NODE_COLOR
+        self.down_weight = 1
+        self.up_weight = 1
+        self.right_weight = 1
+        self.left_weight = 1
 
     def make_start(self):
         """
