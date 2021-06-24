@@ -3,7 +3,7 @@ External functions used to make, draw, and find positions on grid.
 """
 from NegativeCycleException import NegativeCycleException
 from Node import Node
-from constants import COLORS
+from Constants import COLORS
 import pygame
 from Edge import Edge
 
@@ -161,25 +161,25 @@ def dijkstra(draw_func, grid, start, end):
 
         for neighbor in current.neighbors:
             commands += 1
-            if not neighbor.is_state('BARRIER'):
+            #if not neighbor.is_state('BARRIER'):
                 # Inefficient, but for some reason updated barriers get added
                 # to neighbors
-                alt = dist[current] + current.neighbors[neighbor]
-                # Adds distance of current to the distance between neighbors
-                if alt < dist[neighbor]:
-                    dist[neighbor] = alt
-                    node_queue[neighbor] = alt
-                    previous[neighbor] = current
-                    if not (
-                        neighbor.is_state(
-                            'START',
-                            'END',
-                            'BARRIER')) and draw_func:
-                        neighbor.set_state('OPEN')
+            alt = dist[current] + current.neighbors[neighbor]
+            # Adds distance of current to the distance between neighbors
+            if alt < dist[neighbor]:
+                dist[neighbor] = alt
+                node_queue[neighbor] = alt
+                previous[neighbor] = current
+                if not (
+                    neighbor.is_state(
+                        'START',
+                        'END',
+                        'BARRIER')) and draw_func:
+                    neighbor.set_state('OPEN')
 
-                elif current != start and current != end and current.is_state('OPEN')\
-                        and draw_func:  # Closes unneeded nodes
-                    current.set_state('CLOSED')
+            elif current != start and current != end and current.is_state('OPEN')\
+                    and draw_func:  # Closes unneeded nodes
+                current.set_state('CLOSED')
 
         if draw_func:
             draw_func()
@@ -229,18 +229,18 @@ def bellmanford(draw_func, grid, start, end):
 
                 current = edge.get_source()
                 neighbor = edge.get_destination()
-                if not current.is_state('BARRIER'):
-                    temp_dist = dist[current] + edge.get_weight()
-                    if temp_dist < dist[neighbor]:
-                        dist[neighbor] = temp_dist
-                        previous[neighbor] = current
-                        if not (
-                            neighbor.is_state(
-                                'START',
-                                'END',
-                                'BARRIER')) and draw_func:
-                            neighbor.set_state('OPEN')
-                            changes_made = True
+                #if not current.is_state('BARRIER'):
+                temp_dist = dist[current] + edge.get_weight()
+                if temp_dist < dist[neighbor]:
+                    dist[neighbor] = temp_dist
+                    previous[neighbor] = current
+                    if not (
+                        neighbor.is_state(
+                            'START',
+                            'END',
+                            'BARRIER')) and draw_func:
+                        neighbor.set_state('OPEN')
+                        changes_made = True
 
                 if current != start and current != end and current.is_state(
                         'OPEN') and draw_func:

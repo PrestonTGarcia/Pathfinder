@@ -3,9 +3,11 @@ The main method of the program: opens pygame window and has main loop.
 """
 import pygame.locals
 import EditWindow
-from functions import *
-from constants import WIDTH
-from constants import ROWS
+import VisualWindow
+from Functions import *
+from Constants import WIDTH
+from Constants import ROWS
+from Constants import DRAW_FUNCS
 from tkinter import Tk
 from tkinter import messagebox as mb
 
@@ -79,9 +81,12 @@ def main():
                         for node in row:
                             node.update_neighbors(grid)
 
-                    d_commands, d_found = dijkstra(lambda: draw(
-                        WIN, grid, ROWS, WIDTH), grid, start, end)
-                    b_commands, b_found = bellmanford(None, grid, start, end)
+                    for i in range(len(DRAW_FUNCS)):
+                        if DRAW_FUNCS[i]:
+                            DRAW_FUNCS[i] = lambda: draw(WIN, grid, ROWS, WIDTH)
+
+                    d_commands, d_found = dijkstra(DRAW_FUNCS[0], grid, start, end)
+                    b_commands, b_found = bellmanford(DRAW_FUNCS[1], grid, start, end)
                     pygame.display.set_caption("Algorithm Comparison")
 
                     if d_found:
@@ -126,6 +131,9 @@ def main():
                 if event.key == pygame.K_b:
 
                     grid = make_grid_keep_edits(ROWS, grid)
+
+                if event.key == pygame.K_v:
+                    VisualWindow.main()
 
     pygame.quit()
 

@@ -1,7 +1,7 @@
 """
 Node class
 """
-from constants import *
+from Constants import *
 import pygame
 
 
@@ -92,6 +92,7 @@ class Node:
         Updates the neighbor list attribute.
         :param grid: The grid/list of nodes.
         """
+        self.neighbors = {}
 
         if self.row < self.total_rows - \
                 1 and not grid[self.row + 1][self.col].is_state('BARRIER'):  # Down
