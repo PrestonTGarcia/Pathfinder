@@ -38,7 +38,6 @@ class Node:
         for state in states:
 
             if self.color == COLORS[state]:
-
                 return True
 
         return False
@@ -94,18 +93,23 @@ class Node:
         """
         self.neighbors = {}
 
-        if self.row < self.total_rows - \
-                1 and not grid[self.row + 1][self.col].is_state('BARRIER'):  # Down
+        allowed_nodes = {'Down':
+                         self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_state('BARRIER'),
+                         'Up':
+                         self.row > 0 and not grid[self.row - 1][self.col].is_state('BARRIER'),
+                         'Right':
+                         self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_state('BARRIER'),
+                         'Left':
+                         self.col > 0 and not grid[self.row][self.col - 1].is_state('BARRIER')}
+
+        if allowed_nodes['Down']:
             self.neighbors[grid[self.row + 1][self.col]] = self.down_weight
 
-        if self.row > 0 and not grid[self.row -
-                                     1][self.col].is_state('BARRIER'):  # Up
+        if allowed_nodes['Up']:
             self.neighbors[grid[self.row - 1][self.col]] = self.up_weight
 
-        if self.col < self.total_rows - \
-                1 and not grid[self.row][self.col + 1].is_state('BARRIER'):  # Right
+        if allowed_nodes['Right']:
             self.neighbors[grid[self.row][self.col + 1]] = self.right_weight
 
-        if self.col > 0 and not grid[self.row][self.col -
-                                               1].is_state('BARRIER'):  # Left
+        if allowed_nodes['Left']:  # Left
             self.neighbors[grid[self.row][self.col - 1]] = self.left_weight
