@@ -92,20 +92,54 @@ def get_clicked_pos(pos, rows, width):
     return row, col
 
 
-def reconstruct_path(came_from, current, draw_func):
+def reconstruct_path(prev, current, draw_func):
     """
     Draws the path found from the algorithm.
-    :param came_from: The list of nodes in the path.
+    :param prev: The list of nodes in the path.
     :param current: The current node being analyzed;
     the end node since this is only called when end is found.
     :param draw_func: The function used to draw.
     """
-    while current in came_from:
-        current = came_from[current]
+    while current in prev:
+        current = prev[current]
         if current is not None:
             if not current.is_state('START'):
                 current.set_state('PATH')
         draw_func()
+
+
+def init_single_source(grid, start):
+    """
+    Initializes the dist and previous dictionaries.
+    :param grid: The grid of nodes.
+    :param start: The start node.
+    :return: The dist and previous dictionaries.
+    """
+    dist = {node: float('inf') for row in grid for node in row}
+    previous = {node: None for row in grid for node in row}
+    dist[start] = 0
+    return dist, previous
+
+
+def relax(q, dist, previous, u, v, w):
+    """
+    The method that relaxes the distances in the dist and previous dictionaries.
+    :param q: The queue of nodes.
+    :param dist: The dictionary with distances for each node.
+    :param previous: The dictionary with previous values for each node.
+    :param u: The source node.
+    :param v: The destination node.
+    :param w: The weight of the edge between the source and the destination.
+    :return: A boolean representing whether or not relax was made.
+    """
+    alt = dist[u] + w
+    # Adds distance of current to the distance between neighbors
+    if alt < dist[v]:
+        dist[v] = alt
+        q[v] = alt
+        previous[v] = u
+        return True
+    return False
 
 
 def dijkstra(draw_func, grid, start, end):
@@ -118,13 +152,8 @@ def dijkstra(draw_func, grid, start, end):
     :return: A boolean representing whether or not a path is possible between the two nodes.
     """
     commands = 0
-    dist = {node: float('inf') for row in grid for node in row}
-    # Sets dist of each node to infinity
-    commands += len(dist)
-    # Sets previous of each node to None
-    previous = {node: None for row in grid for node in row}
-    commands += len(previous)
-    dist[start] = 0
+    dist, previous = init_single_source(grid, start)
+    commands += len(grid) * 2
     node_queue = dist.copy()
 
     if draw_func:
@@ -161,21 +190,12 @@ def dijkstra(draw_func, grid, start, end):
 
         for neighbor in current.neighbors:
             commands += 1
-            #if not neighbor.is_state('BARRIER'):
-                # Inefficient, but for some reason updated barriers get added
-                # to neighbors
-            alt = dist[current] + current.neighbors[neighbor]
-            # Adds distance of current to the distance between neighbors
-            if alt < dist[neighbor]:
-                dist[neighbor] = alt
-                node_queue[neighbor] = alt
-                previous[neighbor] = current
-                if not (
-                    neighbor.is_state(
-                        'START',
-                        'END',
-                        'BARRIER')) and draw_func:
-                    neighbor.set_state('OPEN')
+            if relax(node_queue, dist, previous, current, neighbor, current.neighbors[neighbor]) and not (
+                neighbor.is_state(
+                    'START',
+                    'END',
+                    'BARRIER')) and draw_func:
+                neighbor.set_state('OPEN')
 
             elif current != start and current != end and current.is_state('OPEN')\
                     and draw_func:  # Closes unneeded nodes
@@ -229,7 +249,6 @@ def bellmanford(draw_func, grid, start, end):
 
                 current = edge.get_source()
                 neighbor = edge.get_destination()
-                #if not current.is_state('BARRIER'):
                 temp_dist = dist[current] + edge.get_weight()
                 if temp_dist < dist[neighbor]:
                     dist[neighbor] = temp_dist
@@ -252,6 +271,10 @@ def bellmanford(draw_func, grid, start, end):
                 draw_func()
 
     commands += len(edges)
+
+    if previous[end] is None:
+
+        return commands, False
 
     try:
 
